@@ -1,0 +1,3 @@
+APP_PORT=5002
+APP_HOST=localhost
+ENVIRONMENT=production

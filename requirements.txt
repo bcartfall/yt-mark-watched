@@ -1,0 +1,6 @@
+selenium
+undetected-chromedriver
+undetected_geckodriver
+Flask
+flask-cors
+waitress
