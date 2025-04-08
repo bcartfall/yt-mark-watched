@@ -100,7 +100,7 @@ class BrowserThread:
             options.set_preference("media.volume_scale", "0.0") # mute
         
             self._driver = webdriver.Firefox(options)
-            self._driver.install_addon(script_dir + "\\extensions\\ublock_origin-1.63.2.xpi")
+            self._driver.install_addon(script_dir + "/extensions/ublock_origin-1.63.2.xpi")
             
             # load youtube so we can set cookies
             self._driver.get("https://www.youtube.com")
@@ -116,8 +116,17 @@ class BrowserThread:
                         'value': cookie['value'],
                     }
                     self._driver.add_cookie(d)
-            _driverStart = time.time()
+            self._driverStart = time.time()
         return self._driver
+    
+    def _driverStatus(self) -> str:
+        status = 'UNKNOWN'
+        with self._driverMutex:
+            if (self._driver == None):
+                status = 'STOPPED'
+            else:
+                status = f'RUNNING ({round(time.time() - self._driverStart)}s)'
+        return status
 
     def _markWatched(self) -> None:
         # mark next item watched
@@ -167,6 +176,9 @@ def reloadCookies() -> bool:
 
 def addToWatched(url: str) -> bool:
     return THREAD._addToWatched(url)
+
+def driverStatus() -> str:
+    return THREAD._driverStatus()
 
 def close() -> None:
     logger.debug('browser close()')

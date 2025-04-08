@@ -1,0 +1,13 @@
+services:
+  yt-mark-watched:
+    build: ./
+    restart: always
+    stop_signal: SIGINT
+    environment:
+      - APP_ENV=production
+      - APP_HOST=$MW_APP_HOST
+      - APP_PORT=$MW_APP_PORT
+    volumes:
+      - ./:/app/yt-mark-watched/
+    ports:
+      - "$MW_APP_PORT:$MW_APP_PORT"

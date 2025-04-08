@@ -28,7 +28,8 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 
 @app.route('/')
 def index():
-    return f"<p>yt-mark-watched API</p>"
+    
+    return f"<p>yt-mark-watched API</p><p>WebDriver is currently {browser.driverStatus()}"
 
 @app.post('/api/videos/mark-watched')
 def api_add():
@@ -64,11 +65,11 @@ if __name__ == "__main__":
         browser.run()
         
         host = os.environ['APP_HOST'] or '0.0.0.0'
-        port = int(os.environ['APP_PORT'])
+        port = int(os.environ['APP_PORT']) or 5002
         logger.info(f"Running yt-mark-watched server http://{host}:{str(port)}")
         
-        #serve(app, host=host, port=port)
-        app.run(host=os.environ['APP_HOST'] or '0.0.0.0', port=int(os.environ['APP_PORT']) or 5002, debug=False, use_reloader=False)
+        serve(app, host=host, port=port)
+        #app.run(host=host, port=port, debug=False, use_reloader=False)
     finally:
         logger.info("Stopping server.")
         browser.close()        
