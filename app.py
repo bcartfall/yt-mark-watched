@@ -6,8 +6,13 @@ from threads import browser
 #import undetected_chromedriver as uc
 
 # setup logger
+script_dir = os.path.dirname(os.path.realpath(__file__))
+data_dir = script_dir + '/data'
+if not os.path.exists(data_dir):
+    os.makedirs(data_dir)
+
 logger = logging.getLogger('yt-mark-watched')
-handler = RotatingFileHandler('./data/mark-watched.log', maxBytes=10 * 1024 * 1024, backupCount=8)
+handler = RotatingFileHandler(data_dir + '/mark-watched.log', maxBytes=10 * 1024 * 1024, backupCount=8)
 formatter = logging.Formatter('%(asctime)s,%(msecs)03d %(levelname)-8s %(message)s [%(filename)s:%(lineno)d]')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
@@ -24,7 +29,6 @@ from flask import request, jsonify
 
 app = Flask("yt-mark-watched")
 cors = CORS(app) # enable cross-origin on all requests
-script_dir = os.path.dirname(os.path.realpath(__file__))
 
 @app.route('/')
 def index():
@@ -64,8 +68,8 @@ if __name__ == "__main__":
         # start threads
         browser.run()
         
-        host = os.environ['APP_HOST'] or '0.0.0.0'
-        port = int(os.environ['APP_PORT']) or 5002
+        host = os.environ.get('APP_HOST', '0.0.0.0')
+        port = int(os.environ.get('APP_PORT', '5002'))
         logger.info(f"Running yt-mark-watched server http://{host}:{str(port)}")
         
         serve(app, host=host, port=port)
