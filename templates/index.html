@@ -21,7 +21,7 @@
                 const item = json.logs[i];
                 const s = item.split(' ');
                 last = s[0] + ' ' + s[1];
-                selector.innerHTML = selector.innerHTML + item;
+                selector.innerHTML = item + selector.innerHTML;
             }
         }
         setInterval(fetchLogs, 1000);
