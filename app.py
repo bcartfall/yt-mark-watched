@@ -25,18 +25,18 @@ logger.addHandler(stdout_handler)
 from waitress import serve
 from flask import Flask
 from flask_cors import CORS
-from flask import request, jsonify
+from flask import request, jsonify, render_template, Response
 
 app = Flask("yt-mark-watched")
 cors = CORS(app) # enable cross-origin on all requests
 
 @app.route('/')
-def index():
-    
-    return f"<p>yt-mark-watched API</p><p>WebDriver is currently {browser.driverStatus()}"
+def index() -> Response:
+    webDriverStatus = browser.driverStatus()
+    return render_template('index.html', webDriverStatus=webDriverStatus)
 
 @app.post('/api/videos/mark-watched')
-def api_add():
+def api_add() -> Response:
     content = request.get_json(silent=True)
     url = content['url']
     logger.debug(f'/api/videos/mark-watched url={url}')
@@ -48,7 +48,7 @@ def api_add():
     return "Error adding url", 500
 
 @app.post('/api/cookies/update')
-def api_cookies_update():
+def api_cookies_update() -> Response:
     cookies = request.data
     logger.debug(f'/api/cookies/update cookies_len={len(cookies)}')
     
@@ -62,6 +62,52 @@ def api_cookies_update():
     return jsonify(
         message='Cookies updated.',
     )
+    
+@app.get('/api/logs')
+def api_logs() -> Response:
+    
+    l = request.args.get('l', '')
+    n = int(request.args.get('n', '20'))
+
+    with open(script_dir + '/data/mark-watched.log', 'r') as f:
+        logs = tail(f, lines=n)
+        if (l != ''):
+            # remove anything older than last (l)
+            nLogs = []
+            for line in logs:
+                s = line.split(" ")
+                if (s[0] + ' ' + s[1] > l):
+                    nLogs.append(line)
+            logs = nLogs
+    return jsonify(
+        logs=logs
+    )
+
+def tail(f, lines=1, _buffer=4098) -> list:
+    """Tail a file and get X lines from the end"""
+    # place holder for the lines found
+    lines_found = []
+
+    # block counter will be multiplied by buffer
+    # to get the block size from the end
+    block_counter = -1
+
+    # loop until we find X lines
+    while len(lines_found) < lines:
+        try:
+            f.seek(block_counter * _buffer, os.SEEK_END)
+        except IOError:  # either file is too small, or too many lines requested
+            f.seek(0)
+            lines_found = f.readlines()
+            break
+
+        lines_found = f.readlines()
+
+        # decrement the block counter to get the
+        # next X bytes
+        block_counter -= 1
+
+    return lines_found[-lines:]
 
 if __name__ == "__main__":
     try:

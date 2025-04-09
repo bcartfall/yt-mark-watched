@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>yt-mark-watched API</title>
+</head>
+<body>
+    <p>yt-mark-watched API</p>
+    <p>WebDriver is currently {{ webDriverStatus }}</p>
+    <pre id="logs">...</pre>
+    <script>
+        let last = '';
+        async function fetchLogs() {
+            const response = await fetch('/api/logs?n=100&l=' + last),
+                json = await response.json();
+            const selector = document.getElementById('logs');
+            if (!last) {
+                selector.innerHTML = ''; // done loading
+            }
+            for (let i in json.logs) {
+                const item = json.logs[i];
+                const s = item.split(' ');
+                last = s[0] + ' ' + s[1];
+                selector.innerHTML = selector.innerHTML + item;
+            }
+        }
+        setInterval(fetchLogs, 1000);
+        fetchLogs();
+    </script>
+</body>
+</html>
