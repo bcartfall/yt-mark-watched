@@ -82,7 +82,18 @@ class BrowserThread:
             if (os.path.exists(cookieFile)):
                 with open(cookieFile) as f:
                     cookies = json.load(f)
-                for cookie in cookies:
+
+                self._driver.get("https://www.youtube.com")
+                for cookie in cookies['https://www.youtube.com']:
+                    d = {
+                        'name': cookie['name'],
+                        'value': cookie['value'],
+                    }
+                    self._driver.add_cookie(d)
+
+                # load accounts.youtube so we can set cookies
+                self._driver.get("https://accounts.youtube.com")
+                for cookie in cookies['https://accounts.youtube.com']:
                     d = {
                         'name': cookie['name'],
                         'value': cookie['value'],
@@ -109,16 +120,25 @@ class BrowserThread:
         
             self._driver = webdriver.Firefox(options)
             self._driver.install_addon(script_dir + "/extensions/ublock_origin-1.63.2.xpi")
-            
-            # load youtube so we can set cookies
-            self._driver.get("https://www.youtube.com")
-            
+                      
             # cookies
             cookieFile = script_dir + "/data/cookies.txt"
             if (os.path.exists(cookieFile)):
                 with open(cookieFile) as f:
                     cookies = json.load(f)
-                for cookie in cookies:
+
+                # load www.youtube so we can set cookies
+                self._driver.get("https://www.youtube.com")
+                for cookie in cookies['https://www.youtube.com']:
+                    d = {
+                        'name': cookie['name'],
+                        'value': cookie['value'],
+                    }
+                    self._driver.add_cookie(d)
+
+                # load accounts.youtube so we can set cookies
+                self._driver.get("https://accounts.youtube.com")
+                for cookie in cookies['https://accounts.youtube.com']:
                     d = {
                         'name': cookie['name'],
                         'value': cookie['value'],
@@ -178,14 +198,22 @@ class BrowserThread:
                 element.click()
                 time.sleep(1)
             else:
-                # send space bar to play
-                body.send_keys(Keys.SPACE)
+                # wait for page to load
+                time.sleep(3)
+                element = driver.find_element(By.CLASS_NAME, "ytp-play-button")
+
+                # play
+                element.click()
+                #body.send_keys(Keys.SPACE)
                 time.sleep(3)
                 
-                # send space bar to pause
-                body.send_keys(Keys.SPACE)
-                time.sleep(1)
+                # pause
+                element.click()
+                time.sleep(3)
                 
+            # load blank page to free memory
+            driver.get("about:blank")
+
             logger.debug("done url=" + item)
         return
 
