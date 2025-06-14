@@ -200,16 +200,19 @@ class BrowserThread:
             else:
                 # wait for page to load
                 time.sleep(3)
+                driver.save_screenshot(script_dir + '/data/1_loaded.png')
                 element = driver.find_element(By.CLASS_NAME, "ytp-play-button")
 
                 # play
                 element.click()
                 #body.send_keys(Keys.SPACE)
                 time.sleep(3)
+                driver.save_screenshot(script_dir + '/data/2_playing.png')
                 
                 # pause
                 element.click()
                 time.sleep(3)
+                driver.save_screenshot(script_dir + '/data/3_paused.png')
                 
             # load blank page to free memory
             driver.get("about:blank")
